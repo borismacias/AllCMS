@@ -16,5 +16,18 @@
 /tmp/*
 !/log/.keep
 !/tmp/.keep
+#Ignore sidekiq log
+sidekig.log
+/node_modules
+/yarn-error.log
+.log
 
 .byebug_history
+# Ignore setting ruby version and gemfile automatically
+.ruby-version
+.ruby-gemset
+.rubocop.yml
+/public/uploads/
+.DS_Store
+app/.DS_Store
+sidekiq.log
