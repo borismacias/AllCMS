@@ -1,0 +1,51 @@
+version: '2'
+services:
+  all-cms:
+    container_name: all-cms
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - all-cms-db
+    environment:
+      - PASSENGER_APP_ENV=development
+      - VIRTUAL_HOST=all-cms.dev.borisgonzalez.me
+      - RAILS_LOG_TO_STDOUT=true
+      - VIRTUAL_PORT=80
+    volumes:
+      - .:/home/app/webapp
+  all-cms-db:
+    image: postgres:9.5.2
+    environment:
+      - POSTGRES_PASSWORD=mysecretpassword
+      - POSTGRES_USER=allcms
+      - POSTGRES_DB=all-cms_development
+    volumes_from:
+      - all-cms-db-data
+    ports:
+      - "5432"
+  all-cms-db-data:
+    image: postgres:9.5.2
+    volumes:
+      - /var/lib/postgresql/data
+    command: /bin/true
+
+  all-cms-redis:
+    image: redis:2
+
+  all-cms-sidekiq:
+    build: .
+    working_dir: /home/app/webapp
+    depends_on:
+      - all-cms-db
+      - all-cms-redis
+    command:  bash -c "bundle && bundle exec sidekiq -d -l sidekiq.log -C ./config/sidekiq.yml -e development --verbose"
+    environment:
+      - PASSENGER_APP_ENV=development
+    volumes:
+      - .:/home/app/webapp
+
+networks:
+  default:
+    external:
+      name: nginxproxy_simple_leads
